@@ -8,3 +8,4 @@ include(cmake/config.cmake)
 include(cmake/sanitizers.cmake)
 
 add_subdirectory(sources/preludec)
+add_subdirectory(sources/sqlite3)
