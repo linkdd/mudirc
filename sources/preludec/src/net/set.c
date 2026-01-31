@@ -1,6 +1,9 @@
 #include <preludec/net/set.h>
 
 
+VEC_IMPLEMENTATION(conn, conn_ref);
+
+
 void conn_set_init(conn_set *self, allocator a) {
   assert(self != NULL);
 
