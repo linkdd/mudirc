@@ -17,7 +17,7 @@ void conn_deinit(conn *self) {
 }
 
 
-conn_error conn_write(conn *self, const_span payload) {
+RESULT(UNIT, conn_error) conn_write(conn *self, const_span payload) {
   assert(self != NULL);
   assert(payload.data != NULL && payload.size > 0);
 
@@ -28,17 +28,22 @@ conn_error conn_write(conn *self, const_span payload) {
 
     isize n = send(self->sock, begin, left, 0);
     if (n < 0) {
-      return CONN_ERR_WRITE_FAILED;
+      return (RESULT(UNIT, conn_error)){
+        .is_ok = false,
+        .err   = CONN_ERR_WRITE_FAILED,
+      };
     }
 
     sent += n;
   }
 
-  return CONN_ERR_NONE;
+  return (RESULT(UNIT, conn_error)){
+    .is_ok = true,
+  };
 }
 
 
-conn_error conn_read(conn *self, span buffer) {
+RESULT(UNIT, conn_error) conn_read(conn *self, span buffer) {
   assert(self != NULL);
   assert(buffer.data != NULL && buffer.size > 0);
 
@@ -49,14 +54,22 @@ conn_error conn_read(conn *self, span buffer) {
 
     isize n = recv(self->sock, begin, left, 0);
     if (n < 0) {
-      return CONN_ERR_READ_FAILED;
+      return (RESULT(UNIT, conn_error)){
+        .is_ok = false,
+        .err   = CONN_ERR_READ_FAILED,
+      };
     }
     if (n == 0) {
-      return CONN_ERR_CLOSED;
+      return (RESULT(UNIT, conn_error)){
+        .is_ok = false,
+        .err   = CONN_ERR_CLOSED,
+      };
     }
 
     received += n;
   }
 
-  return CONN_ERR_NONE;
+  return (RESULT(UNIT, conn_error)){
+    .is_ok = true,
+  };
 }

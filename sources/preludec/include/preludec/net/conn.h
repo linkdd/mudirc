@@ -12,8 +12,9 @@ struct conn {
   socket_handle sock;
 };
 
+typedef conn* conn_ref;
+
 typedef enum {
-  CONN_ERR_NONE = 0,
   CONN_ERR_WRITE_FAILED,
   CONN_ERR_READ_FAILED,
   CONN_ERR_CLOSED,
@@ -23,5 +24,5 @@ typedef enum {
 void conn_init  (conn *self, socket_handle sock);
 void conn_deinit(conn *self);
 
-conn_error conn_write(conn *self, const_span payload);
-conn_error conn_read (conn *self, span       buffer);
+RESULT(UNIT, conn_error) conn_write(conn *self, const_span payload);
+RESULT(UNIT, conn_error) conn_read (conn *self, span       buffer);
