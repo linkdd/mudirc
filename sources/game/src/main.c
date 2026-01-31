@@ -11,17 +11,13 @@ static void on_shutdown_request(void *ctx) {
 }
 
 
-static void on_terminate(void *ctx) {
-  conn_ref c = *(conn_ref*)ctx;
-  conn_deinit(c);
-  fprintf(stderr, "INFO: Connection closed\n");
-}
-
-
 int main(int argc, char *argv[static argc]) {
+  int exit_status = EXIT_SUCCESS;
+
   if (argc < 5) {
     fprintf(stderr, "Usage: %s <db path> <server> <port> <nick>\n", argv[0]);
-    return EXIT_FAILURE;
+    exit_status = EXIT_FAILURE;
+    goto err0;
   }
 
   const char *dbpath = argv[1];
@@ -30,7 +26,6 @@ int main(int argc, char *argv[static argc]) {
   const char *nick   = argv[4];
 
   netlib_init();
-  atexit(netlib_deinit);
 
   fprintf(stderr, "INFO: Connecting to %s:%s...\n", server, port);
   RESULT(conn, str) netlib_res = netlib_create_tcp_client(server, port);
@@ -40,10 +35,11 @@ int main(int argc, char *argv[static argc]) {
       server, port,
       (int)netlib_res.err.length, netlib_res.err.data
     );
-    return EXIT_FAILURE;
+    exit_status = EXIT_FAILURE;
+    goto err1;
   }
 
-  [[gnu::cleanup(on_terminate)]] conn_ref c = &netlib_res.ok;
+  conn_ref c = &netlib_res.ok;
   lc_init(c, on_shutdown_request);
 
   bot b = {};
@@ -53,22 +49,31 @@ int main(int argc, char *argv[static argc]) {
       stderr, "ERROR: %.*s\n",
       (int)bot_res.err.length, bot_res.err.data
     );
-    return EXIT_FAILURE;
+    exit_status = EXIT_FAILURE;
+    goto err2;
   }
 
   RESULT(UNIT, str) loop_res = event_loop(&b);
-
-  bot_deinit(&b);
-
   if (!loop_res.is_ok) {
     fprintf(
       stderr, "ERROR: %.*s\n",
       (int)loop_res.err.length, loop_res.err.data
     );
-    return EXIT_FAILURE;
+    exit_status = EXIT_FAILURE;
+    goto err3;
   }
 
   fprintf(stderr, "INFO: Shutting down\n");
 
-  return EXIT_SUCCESS;
+err3:
+  bot_deinit(&b);
+
+err2:
+  conn_deinit(c);
+
+err1:
+  netlib_deinit();
+
+err0:
+  return exit_status;
 }
