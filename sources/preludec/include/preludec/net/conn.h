@@ -26,3 +26,5 @@ void conn_deinit(conn *self);
 
 RESULT(UNIT, conn_error) conn_write(conn *self, const_span payload);
 RESULT(UNIT, conn_error) conn_read (conn *self, span       buffer);
+
+const char *conn_strerror(conn_error err);

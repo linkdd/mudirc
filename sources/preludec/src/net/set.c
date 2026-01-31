@@ -72,3 +72,14 @@ RESULT(conn_ref, conn_set_error) conn_set_wait(conn_set *self) {
     .err   = CONN_SET_ERR_SELECT_FAILED,
   };
 }
+
+
+const char *conn_set_strerror(conn_set_error err) {
+  switch (err) {
+    case CONN_SET_ERR_SELECT_FAILED:
+      return "select() failed";
+
+      default:
+      return "unknown error";
+  }
+}

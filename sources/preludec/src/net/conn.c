@@ -73,3 +73,20 @@ RESULT(UNIT, conn_error) conn_read(conn *self, span buffer) {
     .is_ok = true,
   };
 }
+
+
+const char *conn_strerror(conn_error err) {
+  switch (err) {
+    case CONN_ERR_WRITE_FAILED:
+      return "send() failed";
+
+      case CONN_ERR_READ_FAILED:
+      return "recv() failed";
+
+    case CONN_ERR_CLOSED:
+      return "connection closed";
+
+    default:
+      return "unknown error";
+  }
+}

@@ -23,3 +23,5 @@ void conn_set_deinit(conn_set *self);
 
 void                             conn_set_add (conn_set *self, conn_ref c);
 RESULT(conn_ref, conn_set_error) conn_set_wait(conn_set *self);
+
+const char *conn_set_strerror(conn_set_error err);
