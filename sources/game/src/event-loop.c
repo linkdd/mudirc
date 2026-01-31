@@ -16,8 +16,8 @@ RESULT(UNIT, str) event_loop(bot *b) {
   };
 
   while (lc_running()) {
-    memset(buffer.data, 0, buffer.capacity);
-    RESULT(UNIT, conn_error) c_res = conn_read(b->conn, &buffer);
+    str view = str_slice(buffer, buffer.length, buffer.capacity);
+    RESULT(UNIT, conn_error) c_res = conn_read(b->conn, &view);
     if (!c_res.is_ok) {
       if (c_res.err != CONN_ERR_CLOSED) {
         return (RESULT(UNIT, str)){
@@ -29,14 +29,37 @@ RESULT(UNIT, str) event_loop(bot *b) {
         break;
       }
     }
+    buffer.length += view.length;
 
-    irc_msg msg = {};
-    if (irc_msg_decode(&msg, buffer)) {
-      RESULT(UNIT, str) res = irc_handler_call(bot_handler(b), &msg);
-      if (!res.is_ok) {
-        return res;
+    do {
+      usize end_of_message = 0;
+      for (usize i = 0; i + 1 < buffer.length; ++i) {
+        if (buffer.data[i] == '\r' && buffer.data[i + 1] == '\n') {
+          end_of_message = i + 2;
+          break;
+        }
       }
-    }
+
+      if (end_of_message == 0) {
+        break;
+      }
+
+      str     line = str_slice(buffer, 0, end_of_message);
+      irc_msg msg  = {};
+      if (irc_msg_decode(&msg, line)) {
+        RESULT(UNIT, str) res = irc_handler_call(bot_handler(b), &msg);
+        if (!res.is_ok) {
+          return res;
+        }
+      }
+
+      memmove(
+        buffer.data,
+        buffer.data + end_of_message,
+        buffer.length - end_of_message
+      );
+      buffer.length -= end_of_message;
+    } while (true);
   }
 
   return (RESULT(UNIT, str)){
