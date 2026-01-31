@@ -1,0 +1,3 @@
+[submodule "cmake/external/sanitizers"]
+	path = cmake/external/sanitizers
+	url = https://github.com/arsenm/sanitizers-cmake.git
