@@ -95,6 +95,8 @@
   };                                                                           \
                                                                                \
   static void chan_##name##_send_task(coro *co, allocator a, span arg) {       \
+    (void)a;                                                                   \
+                                                                               \
     struct chan_##name##_send_task_ctx *ctx = arg.data;                        \
                                                                                \
     while (chan_##name##_is_full(ctx->chan)) coro_yield(co, NULL);             \
@@ -119,6 +121,8 @@
   };                                                                           \
                                                                                \
   static void chan_##name##_receive_task(coro *co, allocator a, span arg) {    \
+    (void)a;                                                                   \
+                                                                               \
     struct chan_##name##_receive_task_ctx *ctx = arg.data;                     \
                                                                                \
     while (chan_##name##_is_empty(ctx->chan)) coro_yield(co, NULL);            \
