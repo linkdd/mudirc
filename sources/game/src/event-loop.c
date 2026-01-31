@@ -7,11 +7,12 @@
 RESULT(UNIT, str) event_loop(bot *b) {
   assert(b != NULL);
 
-  char bufmem[irc_msg_buffer_size] = {};
+  constexpr usize bufsz = 4096;
+  char bufmem[bufsz] = {};
   str buffer = {
     .data     = bufmem,
     .length   = 0,
-    .capacity = irc_msg_buffer_size,
+    .capacity = bufsz,
     .owned    = false,
   };
 
