@@ -1,0 +1,72 @@
+#pragma once
+
+#ifndef _WIN32
+# define _POSIX_C_SOURCE 200809L
+#endif
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdalign.h>
+#include <stdarg.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <string.h>
+
+
+// MARK: - typedefs
+typedef uint8_t   u8;
+typedef uint16_t  u16;
+typedef uint32_t  u32;
+typedef uint64_t  u64;
+
+typedef int8_t    i8;
+typedef int16_t   i16;
+typedef int32_t   i32;
+typedef int64_t   i64;
+
+typedef float     f32;
+typedef double    f64;
+
+typedef ptrdiff_t isize;
+typedef size_t    usize;
+
+typedef uintptr_t uptr;
+
+typedef struct UNIT {} UNIT;
+
+#define OPTION(T)     struct option_##T       { bool is_some; union { T some; UNIT none; }; }
+#define RESULT(T, E)  struct result_##T##_##E { bool is_ok;   union { T ok;   E    err;  }; }
+
+
+// MARK: - assertions
+#ifdef assert
+#undef assert
+#endif
+
+#define _assert_disabled(cond)                                                 \
+  do {                                                                         \
+    (void) (sizeof(cond));                                                     \
+  } while (false)
+
+#define _assert_enabled(cond)                                                  \
+  do {                                                                         \
+    if (!(cond)) {                                                             \
+      fprintf(                                                                 \
+        stderr, "Assertion failed: %s, file %s, line %d\n",                    \
+        #cond, __FILE__, __LINE__                                              \
+      );                                                                       \
+      abort();                                                                 \
+    }                                                                          \
+  } while (false)
+
+
+#ifdef NDEBUG
+#define assert(cond)         _assert_disabled(cond)
+#define assert_release(cond) _assert_enabled (cond)
+#else
+#define assert(cond)         _assert_enabled (cond)
+#define assert_release(cond) _assert_enabled (cond)
+#endif
