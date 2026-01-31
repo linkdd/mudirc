@@ -1,7 +1,7 @@
 #include <game/bot.h>
 
 // MARK: - handlers
-static RESULT(UNIT, str) bot__ping(void *udata, irc_msg *msg) {
+static irc_error bot__ping(void *udata, irc_msg *msg) {
   assert(udata != NULL);
   assert(msg   != NULL);
 
@@ -9,19 +9,19 @@ static RESULT(UNIT, str) bot__ping(void *udata, irc_msg *msg) {
 
   RESULT(UNIT, conn_error) res = conn_write(self->conn, str_literal("PONG"));
   if (!res.is_ok) {
-    return (RESULT(UNIT, str)){
+    return (irc_error){
       .is_ok = false,
       .err   = strview_from_cstr(conn_strerror(res.err)),
     };
   }
 
-  return (RESULT(UNIT, str)){
+  return (irc_error){
     .is_ok = true,
   };
 }
 
 
-static RESULT(UNIT, str) bot__fallback(void *udata, irc_msg *msg) {
+static irc_error bot__fallback(void *udata, irc_msg *msg) {
   assert(udata != NULL);
   assert(msg   != NULL);
 
@@ -32,7 +32,7 @@ static RESULT(UNIT, str) bot__fallback(void *udata, irc_msg *msg) {
 
   str_free(a, &s);
 
-  return (RESULT(UNIT, str)){
+  return (irc_error){
     .is_ok = true,
   };
 }

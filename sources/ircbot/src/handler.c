@@ -1,12 +1,12 @@
 #include <ircbot/handler.h>
 
 
-RESULT(UNIT, str) irc_handler_call(irc_handler self, irc_msg *msg) {
+irc_error irc_handler_call(irc_handler self, irc_msg *msg) {
   assert(msg  != NULL);
 
   struct {
     str cmd;
-    RESULT(UNIT, str) (*handler)(void *udata, irc_msg *msg);
+    irc_error (*handler)(void *udata, irc_msg *msg);
   } handlers[] = {
     { str_literal("001"),     self.welcome   },
     { str_literal("433"),     self.nickinuse },
@@ -38,7 +38,7 @@ RESULT(UNIT, str) irc_handler_call(irc_handler self, irc_msg *msg) {
     return self.fallback(self.udata, msg);
   }
 
-  return (RESULT(UNIT, str)){
+  return (irc_error){
     .is_ok = true,
   };
 }
