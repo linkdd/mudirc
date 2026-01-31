@@ -18,6 +18,13 @@
       closesocket(sock);
     }
   }
+
+
+  static inline void netlib_socket_shutdown(socket_handle sock) {
+    if (sock != invalid_socket) {
+      shutdown(sock, SD_RECEIVE);
+    }
+  }
 #else
   #include <sys/socket.h>
   #include <sys/select.h>
@@ -39,6 +46,13 @@
   static inline void netlib_socket_close(socket_handle sock) {
     if (sock != invalid_socket) {
       close(sock);
+    }
+  }
+
+
+  static inline void netlib_socket_shutdown(socket_handle sock) {
+    if (sock != invalid_socket) {
+      shutdown(sock, SHUT_RD);
     }
   }
 #endif

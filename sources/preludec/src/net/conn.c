@@ -69,6 +69,13 @@ RESULT(UNIT, conn_error) conn_read(conn *self, str *buffer) {
 }
 
 
+void conn_shutdown(conn *self) {
+  assert(self != NULL);
+
+  netlib_socket_shutdown(self->sock);
+}
+
+
 const char *conn_strerror(conn_error err) {
   switch (err) {
     case CONN_ERR_WRITE_FAILED:
