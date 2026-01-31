@@ -17,14 +17,14 @@ void conn_deinit(conn *self) {
 }
 
 
-RESULT(UNIT, conn_error) conn_write(conn *self, const_span payload) {
+RESULT(UNIT, conn_error) conn_write(conn *self, str payload) {
   assert(self != NULL);
-  assert(payload.data != NULL && payload.size > 0);
+  assert(payload.data != NULL && payload.length > 0);
 
   usize sent = 0;
-  while (sent < payload.size) {
+  while (sent < payload.length) {
     void *begin = (void*)((uptr)payload.data + sent);
-    usize left  = payload.size - sent;
+    usize left  = payload.length - sent;
 
     isize n = send(self->sock, begin, left, 0);
     if (n < 0) {
@@ -43,31 +43,25 @@ RESULT(UNIT, conn_error) conn_write(conn *self, const_span payload) {
 }
 
 
-RESULT(UNIT, conn_error) conn_read(conn *self, span buffer) {
+RESULT(UNIT, conn_error) conn_read(conn *self, str *buffer) {
   assert(self != NULL);
-  assert(buffer.data != NULL && buffer.size > 0);
+  assert(buffer->data != NULL && buffer->capacity > 0);
 
-  usize received = 0;
-  while (received < buffer.size) {
-    void *begin = (void*)((uptr)buffer.data + received);
-    usize left  = buffer.size - received;
-
-    isize n = recv(self->sock, begin, left, 0);
-    if (n < 0) {
-      return (RESULT(UNIT, conn_error)){
-        .is_ok = false,
-        .err   = CONN_ERR_READ_FAILED,
-      };
-    }
-    if (n == 0) {
-      return (RESULT(UNIT, conn_error)){
-        .is_ok = false,
-        .err   = CONN_ERR_CLOSED,
-      };
-    }
-
-    received += n;
+  isize n = recv(self->sock, buffer->data, buffer->capacity, 0);
+  if (n < 0) {
+    return (RESULT(UNIT, conn_error)){
+      .is_ok = false,
+      .err   = CONN_ERR_READ_FAILED,
+    };
   }
+  if (n == 0) {
+    return (RESULT(UNIT, conn_error)){
+      .is_ok = false,
+      .err   = CONN_ERR_CLOSED,
+    };
+  }
+
+  buffer->length = (usize)n;
 
   return (RESULT(UNIT, conn_error)){
     .is_ok = true,

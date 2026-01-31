@@ -2,7 +2,7 @@
 
 #include <preludec/defs.h>
 #include <preludec/mem/alloc.h>
-#include <preludec/mem/span.h>
+#include <preludec/mem/str.h>
 
 #include <preludec/net/socket.h>
 
@@ -24,7 +24,7 @@ typedef enum {
 void conn_init  (conn *self, socket_handle sock);
 void conn_deinit(conn *self);
 
-RESULT(UNIT, conn_error) conn_write(conn *self, const_span payload);
-RESULT(UNIT, conn_error) conn_read (conn *self, span       buffer);
+RESULT(UNIT, conn_error) conn_write(conn *self, str  payload);
+RESULT(UNIT, conn_error) conn_read (conn *self, str *buffer);
 
 const char *conn_strerror(conn_error err);
