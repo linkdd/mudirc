@@ -26,6 +26,7 @@ struct irc_msg_prefix {
 
 typedef struct irc_msg irc_msg;
 struct irc_msg {
+  bool           has_prefix;
   irc_msg_prefix prefix;
   str            command;
 

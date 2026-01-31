@@ -73,9 +73,13 @@ static str parse_prefix(irc_msg *self, str line) {
       }
     }
 
+    self->has_prefix = true;
+
     return str_slice(line, i + 1, line.length);
   }
   else {
+    self->has_prefix = false;
+
     return line;
   }
 }
@@ -158,45 +162,47 @@ str irc_msg_encode(irc_msg *self, allocator a) {
 
   str buffer = str_make(a, irc_msg_buffer_size);
 
-  if (self->prefix.is_server) {
-    buffer.data[buffer.length++] = ':';
-    memcpy(
-      buffer.data + buffer.length,
-      self->prefix.server.ident.data,
-      self->prefix.server.ident.length
-    );
-    buffer.length += self->prefix.server.ident.length;
+  if (self->has_prefix) {
+    if (self->prefix.is_server) {
+      buffer.data[buffer.length++] = ':';
+      memcpy(
+        buffer.data + buffer.length,
+        self->prefix.server.ident.data,
+        self->prefix.server.ident.length
+      );
+      buffer.length += self->prefix.server.ident.length;
 
-    buffer.data[buffer.length++] = ' ';
-  }
-  else {
-    buffer.data[buffer.length++] = ':';
-    memcpy(
-      buffer.data + buffer.length,
-      self->prefix.user.nick.data,
-      self->prefix.user.nick.length
-    );
-    buffer.length += self->prefix.user.nick.length;
+      buffer.data[buffer.length++] = ' ';
+    }
+    else {
+      buffer.data[buffer.length++] = ':';
+      memcpy(
+        buffer.data + buffer.length,
+        self->prefix.user.nick.data,
+        self->prefix.user.nick.length
+      );
+      buffer.length += self->prefix.user.nick.length;
 
-    buffer.data[buffer.length++] = '!';
+      buffer.data[buffer.length++] = '!';
 
-    memcpy(
-      buffer.data + buffer.length,
-      self->prefix.user.ident.data,
-      self->prefix.user.ident.length
-    );
-    buffer.length += self->prefix.user.ident.length;
+      memcpy(
+        buffer.data + buffer.length,
+        self->prefix.user.ident.data,
+        self->prefix.user.ident.length
+      );
+      buffer.length += self->prefix.user.ident.length;
 
-    buffer.data[buffer.length++] = '@';
+      buffer.data[buffer.length++] = '@';
 
-    memcpy(
-      buffer.data + buffer.length,
-      self->prefix.user.host.data,
-      self->prefix.user.host.length
-    );
-    buffer.length += self->prefix.user.host.length;
+      memcpy(
+        buffer.data + buffer.length,
+        self->prefix.user.host.data,
+        self->prefix.user.host.length
+      );
+      buffer.length += self->prefix.user.host.length;
 
-    buffer.data[buffer.length++] = ' ';
+      buffer.data[buffer.length++] = ' ';
+    }
   }
 
   memcpy(
