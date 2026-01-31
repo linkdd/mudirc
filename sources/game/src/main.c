@@ -5,9 +5,16 @@
 #include <game/bot.h>
 
 
-static void on_shutdown(void *ctx) {
+static void on_shutdown_request(void *ctx) {
   conn_ref c = (conn_ref)ctx;
+  conn_shutdown(c);
+}
+
+
+static void on_terminate(void *ctx) {
+  conn_ref c = *(conn_ref*)ctx;
   conn_deinit(c);
+  fprintf(stderr, "INFO: Connection closed\n");
 }
 
 
@@ -25,6 +32,7 @@ int main(int argc, char *argv[static argc]) {
   netlib_init();
   atexit(netlib_deinit);
 
+  fprintf(stderr, "INFO: Connecting to %s:%s...\n", server, port);
   RESULT(conn, str) netlib_res = netlib_create_tcp_client(server, port);
   if (!netlib_res.is_ok) {
     fprintf(
@@ -35,16 +43,16 @@ int main(int argc, char *argv[static argc]) {
     return EXIT_FAILURE;
   }
 
-  lc_init(&netlib_res.ok, on_shutdown);
+  [[gnu::cleanup(on_terminate)]] conn_ref c = &netlib_res.ok;
+  lc_init(c, on_shutdown_request);
 
   bot b = {};
-  RESULT(UNIT, str) bot_res = bot_init(&b, dbpath, &netlib_res.ok, strview_from_cstr(nick));
+  RESULT(UNIT, str) bot_res = bot_init(&b, dbpath, c, strview_from_cstr(nick));
   if (!bot_res.is_ok) {
     fprintf(
       stderr, "ERROR: %.*s\n",
       (int)bot_res.err.length, bot_res.err.data
     );
-    conn_deinit(&netlib_res.ok);
     return EXIT_FAILURE;
   }
 
@@ -53,11 +61,14 @@ int main(int argc, char *argv[static argc]) {
   bot_deinit(&b);
 
   if (!loop_res.is_ok) {
-    fprintf(stderr, "ERROR: %.*s\n", (int)loop_res.err.length, loop_res.err.data);
+    fprintf(
+      stderr, "ERROR: %.*s\n",
+      (int)loop_res.err.length, loop_res.err.data
+    );
     return EXIT_FAILURE;
   }
 
-  printf("INFO: Shutdown\n");
+  fprintf(stderr, "INFO: Shutting down\n");
 
   return EXIT_SUCCESS;
 }

@@ -70,8 +70,6 @@ void bot_deinit(bot *self) {
     sqlite3_close(self->db);
   }
 
-  conn_deinit(self->conn);
-
   memset(self, 0, sizeof(bot));
 }
 

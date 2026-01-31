@@ -19,7 +19,7 @@ RESULT(UNIT, str) event_loop(bot *b) {
     memset(buffer.data, 0, buffer.capacity);
     RESULT(UNIT, conn_error) c_res = conn_read(b->conn, &buffer);
     if (!c_res.is_ok) {
-      if (lc_running()) {
+      if (c_res.err != CONN_ERR_CLOSED) {
         return (RESULT(UNIT, str)){
           .is_ok = false,
           .err   = strview_from_cstr(conn_strerror(c_res.err)),
