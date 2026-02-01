@@ -1,4 +1,5 @@
 #include <preludec/net/lib.h>
+#include <preludec/mem/arena.h>
 
 #include <game/event-loop.h>
 #include <game/lifecycle.h>
@@ -7,6 +8,21 @@
 
 static void on_shutdown_request(void *ctx) {
   conn_ref c = (conn_ref)ctx;
+
+  char      buf[irc_msg_buffer_size] = {};
+  arena     scratch                  = {};
+  allocator a                        = arena_allocator(&scratch);
+  arena_init(&scratch, make_span(buf, irc_msg_buffer_size));
+
+  irc_msg m_quit     = {};
+  m_quit.has_prefix  = false;
+  m_quit.command     = str_literal("QUIT");
+  m_quit.param_count = 0;
+  m_quit.trailing    = str_literal("He's dead Jim.");
+
+  str s_quit = irc_msg_encode(&m_quit, a);
+  (void)conn_write(c, s_quit);
+
   conn_shutdown(c);
 }
 
