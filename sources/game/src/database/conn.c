@@ -11,6 +11,24 @@ RESULT(UNIT, str) dbconn_init(dbconn *self, const char *path) {
     return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errmsg(self->handle)));
   }
 
+  res = sqlite3_exec(
+    self->handle,
+    "PRAGMA journal_mode       = WAL;"
+    "PRAGMA synchronous        = NORMAL;"
+    "PRAGMA mmap_size          = 134217728;"
+    "PRAGMA journal_size_limit = 27103364;"
+    "PRAGMA cache_size         = 2000;"
+    "PRAGMA foreign_keys       = ON;",
+    NULL,
+    NULL,
+    NULL
+  );
+  if (res != SQLITE_OK) {
+    sqlite3_close(self->handle);
+    self->handle = NULL;
+    return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errmsg(self->handle)));
+  }
+
   return (RESULT(UNIT, str)) OK({});
 }
 
