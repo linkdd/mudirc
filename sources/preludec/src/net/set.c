@@ -31,10 +31,7 @@ RESULT(conn_ref, conn_set_error) conn_set_wait(conn_set *self) {
   assert(self != NULL);
 
   if (self->conns.count == 0) {
-    return (RESULT(conn_ref, conn_set_error)){
-      .is_ok = true,
-      .ok    = NULL,
-    };
+    return (RESULT(conn_ref, conn_set_error)) OK(NULL);
   }
 
   fd_set fds = {};
@@ -57,20 +54,14 @@ RESULT(conn_ref, conn_set_error) conn_set_wait(conn_set *self) {
       conn_ref c = *vec_conn_at(&self->conns, i);
 
       if (FD_ISSET(c->sock, &fds)) {
-        return (RESULT(conn_ref, conn_set_error)){
-          .is_ok = true,
-          .ok    = c,
-        };
+        return (RESULT(conn_ref, conn_set_error)) OK(c);
       }
     }
 
     unreachable();
   }
 
-  return (RESULT(conn_ref, conn_set_error)){
-    .is_ok = false,
-    .err   = CONN_SET_ERR_SELECT_FAILED,
-  };
+  return (RESULT(conn_ref, conn_set_error)) ERR(CONN_SET_ERR_SELECT_FAILED);
 }
 
 

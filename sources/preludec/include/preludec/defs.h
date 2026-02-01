@@ -38,8 +38,13 @@ typedef uintptr_t uptr;
 
 typedef struct UNIT {} UNIT;
 
-#define OPTION(T)     struct option_##T       { bool is_some; union { T some; UNIT none; }; }
-#define RESULT(T, E)  struct result_##T##_##E { bool is_ok;   union { T ok;   E    err;  }; }
+#define OPTION(T)     struct option_##T { bool is_some; union { T some; UNIT none; }; }
+#define SOME(V)       { .is_some = true,  .some = V }
+#define NONE()        { .is_some = false            }
+
+#define RESULT(T, E)  struct result_##T##_##E { bool is_ok; union { T ok; E err;  }; }
+#define OK(V)         { .is_ok = true,  .ok  = V }
+#define ERR(V)        { .is_ok = false, .err = V }
 
 
 // MARK: - assertions

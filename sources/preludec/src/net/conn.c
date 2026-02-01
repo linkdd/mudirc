@@ -28,18 +28,13 @@ RESULT(UNIT, conn_error) conn_write(conn *self, str payload) {
 
     isize n = send(self->sock, begin, left, 0);
     if (n < 0) {
-      return (RESULT(UNIT, conn_error)){
-        .is_ok = false,
-        .err   = CONN_ERR_WRITE_FAILED,
-      };
+      return (RESULT(UNIT, conn_error)) ERR(CONN_ERR_WRITE_FAILED);
     }
 
     sent += n;
   }
 
-  return (RESULT(UNIT, conn_error)){
-    .is_ok = true,
-  };
+  return (RESULT(UNIT, conn_error)) OK({});
 }
 
 
@@ -49,23 +44,15 @@ RESULT(UNIT, conn_error) conn_read(conn *self, str *buffer) {
 
   isize n = recv(self->sock, buffer->data, buffer->capacity, 0);
   if (n < 0) {
-    return (RESULT(UNIT, conn_error)){
-      .is_ok = false,
-      .err   = CONN_ERR_READ_FAILED,
-    };
+    return (RESULT(UNIT, conn_error)) ERR(CONN_ERR_READ_FAILED);
   }
   if (n == 0) {
-    return (RESULT(UNIT, conn_error)){
-      .is_ok = false,
-      .err   = CONN_ERR_CLOSED,
-    };
+    return (RESULT(UNIT, conn_error)) ERR(CONN_ERR_CLOSED);
   }
 
   buffer->length = (usize)n;
 
-  return (RESULT(UNIT, conn_error)){
-    .is_ok = true,
-  };
+  return (RESULT(UNIT, conn_error)) OK({});
 }
 
 

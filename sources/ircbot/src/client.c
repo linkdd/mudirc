@@ -25,16 +25,10 @@ RESULT(bool, str) irc_client_consume(irc_client *self) {
   RESULT(UNIT, conn_error) c_res = conn_read(self->conn, &view);
   if (!c_res.is_ok) {
     if (c_res.err != CONN_ERR_CLOSED) {
-      return (RESULT(bool, str)){
-        .is_ok = false,
-        .err   = strview_from_cstr(conn_strerror(c_res.err)),
-      };
+      return (RESULT(bool, str)) ERR(strview_from_cstr(conn_strerror(c_res.err)));
     }
     else {
-      return (RESULT(bool, str)){
-        .is_ok = true,
-        .ok    = false,
-      };
+      return (RESULT(bool, str)) OK(false);
     }
   }
   self->buffer.length += view.length;
@@ -57,10 +51,7 @@ RESULT(bool, str) irc_client_consume(irc_client *self) {
     if (irc_msg_decode(&msg, line)) {
       RESULT(UNIT, str) res = irc_handler_call(self->handler, &msg);
       if (!res.is_ok) {
-        return (RESULT(bool, str)){
-          .is_ok = false,
-          .err   = res.err,
-        };
+        return (RESULT(bool, str)) ERR(res.err);
       }
     }
 
@@ -72,8 +63,5 @@ RESULT(bool, str) irc_client_consume(irc_client *self) {
     self->buffer.length -= end_of_message;
   } while (true);
 
-  return (RESULT(bool, str)){
-    .is_ok = true,
-    .ok    = true,
-  };
+  return (RESULT(bool, str)) OK(true);
 }

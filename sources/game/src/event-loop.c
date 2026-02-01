@@ -13,10 +13,7 @@ RESULT(UNIT, str) event_loop(bot *b) {
   while (lc_running()) {
     RESULT(bool, str) res = irc_client_consume(&c);
     if (!res.is_ok) {
-      return (RESULT(UNIT, str)){
-        .is_ok = false,
-        .err   = res.err,
-      };
+      return (RESULT(UNIT, str)) ERR(res.err);
     }
     else {
       bool should_continue = res.ok;
@@ -24,7 +21,5 @@ RESULT(UNIT, str) event_loop(bot *b) {
     }
   }
 
-  return (RESULT(UNIT, str)){
-    .is_ok = true,
-  };
+  return (RESULT(UNIT, str)) OK({});
 }

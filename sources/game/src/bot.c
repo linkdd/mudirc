@@ -39,9 +39,7 @@ static RESULT(UNIT, str) bot__eval_priv_command(bot *self, str from, str message
     return priv_command_unknown(self, from);
   }
 
-  return (RESULT(UNIT, str)){
-    .is_ok = true,
-  };
+  return (RESULT(UNIT, str)) OK({});
 }
 
 
@@ -64,9 +62,7 @@ static RESULT(UNIT, str) bot__eval_game_command(bot *self, str channel, str from
     return game_command_unknown(self, channel, from);
   }
 
-  return (RESULT(UNIT, str)){
-    .is_ok = true,
-  };
+  return (RESULT(UNIT, str)) OK({});
 }
 
 
@@ -89,15 +85,10 @@ static irc_result bot__ping(void *udata, irc_msg *msg) {
 
   RESULT(UNIT, conn_error) res = irc_msg_send(&pong, self->conn, std_allocator());
   if (!res.is_ok) {
-    return (irc_result){
-      .is_ok = false,
-      .err   = strview_from_cstr(conn_strerror(res.err)),
-    };
+    return (irc_result) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
 
-  return (irc_result){
-    .is_ok = true,
-  };
+  return (irc_result) OK({});
 }
 
 
@@ -119,9 +110,7 @@ static irc_result bot__privmsg(void *udata, irc_msg *msg) {
     }
   }
 
-  return (irc_result){
-    .is_ok = true,
-  };
+  return (irc_result) OK({});
 }
 
 
@@ -136,9 +125,7 @@ static irc_result bot__fallback(void *udata, irc_msg *msg) {
 
   str_free(a, &s);
 
-  return (irc_result){
-    .is_ok = true,
-  };
+  return (irc_result) OK({});
 }
 
 
@@ -156,10 +143,7 @@ RESULT(UNIT, str) bot__auth(bot *self) {
 
   RESULT(UNIT, conn_error) res = irc_msg_send(&m_nick, self->conn, a);
   if (!res.is_ok) {
-    return (RESULT(UNIT, str)){
-      .is_ok = false,
-      .err   = strview_from_cstr(conn_strerror(res.err)),
-    };
+    return (RESULT(UNIT, str)) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
 
   irc_msg m_user     = {};
@@ -173,15 +157,10 @@ RESULT(UNIT, str) bot__auth(bot *self) {
 
   res = irc_msg_send(&m_user, self->conn, a);
   if (!res.is_ok) {
-    return (RESULT(UNIT, str)){
-      .is_ok = false,
-      .err   = strview_from_cstr(conn_strerror(res.err)),
-    };
+    return (RESULT(UNIT, str)) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
 
-  return (RESULT(UNIT, str)){
-    .is_ok = true,
-  };
+  return (RESULT(UNIT, str)) OK({});
 }
 
 
@@ -195,10 +174,7 @@ RESULT(UNIT, str) bot_init(bot *self, const char *dbpath, conn_ref c, str nick) 
   int res = sqlite3_open(dbpath, &self->db);
   assert_release(self->db != NULL);
   if (res != SQLITE_OK) {
-    return (RESULT(UNIT, str)){
-      .is_ok = false,
-      .err   = strview_from_cstr(sqlite3_errmsg(self->db)),
-    };
+    return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errmsg(self->db)));
   }
 
   self->conn = c;

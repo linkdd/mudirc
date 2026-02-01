@@ -26,10 +26,7 @@ RESULT(conn, str) netlib_create_tcp_client(const char *host, const char *port) {
 
   struct addrinfo *result = NULL;
   if (getaddrinfo(host, port, &hints, &result) != 0) {
-    return (RESULT(conn, str)){
-      .is_ok = false,
-      .err   = strview_from_cstr(gai_strerror(errno)),
-    };
+    return (RESULT(conn, str)) ERR(strview_from_cstr(gai_strerror(errno)));
   }
 
   struct addrinfo *p    = NULL;
@@ -51,16 +48,10 @@ RESULT(conn, str) netlib_create_tcp_client(const char *host, const char *port) {
   freeaddrinfo(result);
 
   if (p == NULL) {
-    return (RESULT(conn, str)){
-      .is_ok = false,
-      .err   = str_literal("no resolved address"),
-    };
+    return (RESULT(conn, str)) ERR(str_literal("no resolved address"));
   }
 
   conn c = {};
   conn_init(&c, sock);
-  return (RESULT(conn, str)){
-    .is_ok = true,
-    .ok    = c,
-  };
+  return (RESULT(conn, str)) OK(c);
 }
