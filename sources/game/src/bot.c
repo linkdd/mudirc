@@ -17,8 +17,8 @@ static const struct {
   { str_literal("query"), game_command_query },
 };
 
-static constexpr usize game_cmd_hdlr_count = sizeof(game_cmd_hdlrs) / sizeof(game_cmd_hdlrs[0]);
-static constexpr usize priv_cmd_hdlr_count = sizeof(priv_cmd_hdlrs) / sizeof(priv_cmd_hdlrs[0]);
+static constexpr usize game_cmd_hdlr_count = ARRAY_COUNT(game_cmd_hdlrs);
+static constexpr usize priv_cmd_hdlr_count = ARRAY_COUNT(priv_cmd_hdlrs);
 
 
 static RESULT(UNIT, str) bot__eval_priv_command(bot *self, str from, str message) {

@@ -46,6 +46,7 @@ typedef struct UNIT {} UNIT;
 #define OK(V)         { .is_ok = true,  .ok  = V }
 #define ERR(V)        { .is_ok = false, .err = V }
 
+#define ARRAY_COUNT(A) (sizeof(A) / sizeof((A)[0]))
 
 // MARK: - assertions
 #ifdef assert

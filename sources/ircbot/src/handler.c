@@ -20,7 +20,7 @@ irc_result irc_handler_call(irc_handler self, irc_msg *msg) {
     { str_literal("MODE"),    self.mode      },
   };
 
-  const usize handler_count = sizeof(handlers) / sizeof(handlers[0]);
+  const usize handler_count = ARRAY_COUNT(handlers);
 
   for (usize i = 0; i < handler_count; ++i) {
     auto h = handlers[i];
