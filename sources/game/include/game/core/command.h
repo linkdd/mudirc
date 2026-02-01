@@ -3,7 +3,7 @@
 #include <preludec/defs.h>
 #include <preludec/mem/str.h>
 
-#include <game/bot.h>
+#include <game/core/bot.h>
 
 
 static constexpr usize priv_command_max_params = 4;

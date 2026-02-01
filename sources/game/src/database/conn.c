@@ -1,7 +1,7 @@
-#include <game/db.h>
+#include <game/database/conn.h>
 
 
-RESULT(UNIT, str) database_init(database *self, const char *path) {
+RESULT(UNIT, str) dbconn_init(dbconn *self, const char *path) {
   assert(self != NULL);
   assert(path != NULL);
 
@@ -15,12 +15,12 @@ RESULT(UNIT, str) database_init(database *self, const char *path) {
 }
 
 
-void database_deinit(database *self) {
+void dbconn_deinit(dbconn *self) {
   assert(self != NULL);
 
   if (self->handle != NULL) {
     sqlite3_close(self->handle);
   }
 
-  memset(self, 0, sizeof(database));
+  memset(self, 0, sizeof(dbconn));
 }

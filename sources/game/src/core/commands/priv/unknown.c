@@ -1,18 +1,19 @@
-#include <game/command.h>
+#include <game/core/command.h>
 
 
-cmd_result priv_command_list(bot *self, str from, priv_command *cmd) {
+cmd_result priv_command_unknown(bot *self, str from) {
   assert(self != NULL);
-  assert(cmd  != NULL);
+
+  allocator a = std_allocator();
 
   irc_msg resp     = {};
   resp.has_prefix  = false;
   resp.command     = str_literal("PRIVMSG");
   resp.param_count = 1;
   resp.params[0]   = from;
-  resp.trailing    = str_literal("Not yet implemented.");
+  resp.trailing    = str_literal("Unknown command.");
 
-  auto res = irc_msg_send(&resp, self->conn, std_allocator());
+  auto res = irc_msg_send(&resp, self->conn, a);
   if (!res.is_ok) {
     return (cmd_result) ERR(strview_from_cstr(conn_strerror(res.err)));
   }

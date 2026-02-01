@@ -1,5 +1,5 @@
-#include <game/event-loop.h>
-#include <game/lifecycle.h>
+#include <game/core/event-loop.h>
+#include <game/core/lifecycle.h>
 
 #include <ircbot/client.h>
 

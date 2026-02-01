@@ -1,5 +1,5 @@
-#include <game/bot.h>
-#include <game/command.h>
+#include <game/core/bot.h>
+#include <game/core/command.h>
 
 
 // MARK: - commands
@@ -165,7 +165,7 @@ RESULT(UNIT, str) bot__auth(bot *self) {
 
 
 // MARK: - api
-RESULT(UNIT, str) bot_init(bot *self, database *db, conn_ref c, str nick) {
+RESULT(UNIT, str) bot_init(bot *self, dbconn *db, conn_ref c, str nick) {
   assert(self != NULL);
   assert(db    != NULL);
   assert(c    != NULL);

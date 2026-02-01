@@ -1,6 +1,6 @@
 #include <signal.h>
 
-#include <game/lifecycle.h>
+#include <game/core/lifecycle.h>
 
 
 atomic_bool g_running = true;

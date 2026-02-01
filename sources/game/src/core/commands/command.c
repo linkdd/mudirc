@@ -1,4 +1,4 @@
-#include <game/command.h>
+#include <game/core/command.h>
 
 
 static str skip_spaces(str line) {

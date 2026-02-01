@@ -1,4 +1,4 @@
-#include <game/command.h>
+#include <game/core/command.h>
 
 
 cmd_result game_command_query(bot *self, str channel, str from, game_command *cmd) {
