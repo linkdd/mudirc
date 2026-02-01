@@ -5,14 +5,14 @@
 // MARK: - commands
 static const struct {
   str         cmd;
-  cmd_error (*eval)(bot *self, str from, priv_command *cmd);
+  cmd_result (*eval)(bot *self, str from, priv_command *cmd);
 } priv_cmd_hdlrs[] = {
   { str_literal("list"), priv_command_list },
 };
 
 static const struct {
   str         cmd;
-  cmd_error (*eval)(bot *self, str channel, str from, game_command *cmd);
+  cmd_result (*eval)(bot *self, str channel, str from, game_command *cmd);
 } game_cmd_hdlrs[] = {
   { str_literal("query"), game_command_query },
 };
@@ -71,27 +71,37 @@ static RESULT(UNIT, str) bot__eval_game_command(bot *self, str channel, str from
 
 
 // MARK: - handlers
-static irc_error bot__ping(void *udata, irc_msg *msg) {
+static irc_result bot__ping(void *udata, irc_msg *msg) {
   assert(udata != NULL);
   assert(msg   != NULL);
 
   bot *self = (bot *)udata;
 
-  RESULT(UNIT, conn_error) res = conn_write(self->conn, str_literal("PONG"));
+  irc_msg pong     = {};
+  pong.has_prefix  = false;
+  pong.command     = str_literal("PONG");
+  pong.trailing    = msg->trailing;
+  pong.param_count = msg->param_count;
+
+  for (usize i = 0; i < msg->param_count; ++i) {
+    pong.params[i] = msg->params[i];
+  }
+
+  RESULT(UNIT, conn_error) res = irc_msg_send(&pong, self->conn, std_allocator());
   if (!res.is_ok) {
-    return (irc_error){
+    return (irc_result){
       .is_ok = false,
       .err   = strview_from_cstr(conn_strerror(res.err)),
     };
   }
 
-  return (irc_error){
+  return (irc_result){
     .is_ok = true,
   };
 }
 
 
-static irc_error bot__privmsg(void *udata, irc_msg *msg) {
+static irc_result bot__privmsg(void *udata, irc_msg *msg) {
   assert(udata != NULL);
   assert(msg   != NULL);
 
@@ -109,13 +119,13 @@ static irc_error bot__privmsg(void *udata, irc_msg *msg) {
     }
   }
 
-  return (irc_error){
+  return (irc_result){
     .is_ok = true,
   };
 }
 
 
-static irc_error bot__fallback(void *udata, irc_msg *msg) {
+static irc_result bot__fallback(void *udata, irc_msg *msg) {
   assert(udata != NULL);
   assert(msg   != NULL);
 
@@ -126,7 +136,7 @@ static irc_error bot__fallback(void *udata, irc_msg *msg) {
 
   str_free(a, &s);
 
-  return (irc_error){
+  return (irc_result){
     .is_ok = true,
   };
 }
@@ -144,9 +154,7 @@ RESULT(UNIT, str) bot__auth(bot *self) {
   m_nick.param_count = 1;
   m_nick.params[0]   = self->nick;
 
-  str s_nick = irc_msg_encode(&m_nick, a);
-  RESULT(UNIT, conn_error) res = conn_write(self->conn, s_nick);
-  str_free(a, &s_nick);
+  RESULT(UNIT, conn_error) res = irc_msg_send(&m_nick, self->conn, a);
   if (!res.is_ok) {
     return (RESULT(UNIT, str)){
       .is_ok = false,
@@ -163,9 +171,7 @@ RESULT(UNIT, str) bot__auth(bot *self) {
   m_user.params[2]   = str_literal("*");
   m_user.trailing    = str_literal("mudirc bot");
 
-  str s_user = irc_msg_encode(&m_user, a);
-  res = conn_write(self->conn, s_user);
-  str_free(a, &s_user);
+  res = irc_msg_send(&m_user, self->conn, a);
   if (!res.is_ok) {
     return (RESULT(UNIT, str)){
       .is_ok = false,

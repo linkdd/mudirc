@@ -243,3 +243,15 @@ str irc_msg_encode(irc_msg *self, allocator a) {
 
   return buffer;
 }
+
+
+// MARK: - sender
+RESULT(UNIT, conn_error) irc_msg_send(irc_msg *self, conn_ref conn, allocator a) {
+  assert(self != NULL);
+  assert(conn != NULL);
+
+  str encoded = irc_msg_encode(self, a);
+  RESULT(UNIT, conn_error) res = conn_write(conn, encoded);
+  str_free(a, &encoded);
+  return res;
+}

@@ -1,7 +1,7 @@
 #include <game/command.h>
 
 
-cmd_error game_command_unknown(bot *self, str channel, str from) {
+cmd_result game_command_unknown(bot *self, str channel, str from) {
   assert(self != NULL);
 
   allocator a = std_allocator();
@@ -13,19 +13,17 @@ cmd_error game_command_unknown(bot *self, str channel, str from) {
   m_resp.params[0]   = channel;
   m_resp.trailing    = str_join(a, from, str_literal(": Unknown command."));
 
-  str s_resp = irc_msg_encode(&m_resp, a);
-  RESULT(UNIT, conn_error) res = conn_write(self->conn, s_resp);
-  str_free(a, &s_resp);
+  RESULT(UNIT, conn_error) res = irc_msg_send(&m_resp, self->conn, a);
   str_free(a, &m_resp.trailing);
 
   if (!res.is_ok) {
-    return (cmd_error){
+    return (cmd_result){
       .is_ok = false,
       .err   = strview_from_cstr(conn_strerror(res.err)),
     };
   }
 
-  return (cmd_error){
+  return (cmd_result){
     .is_ok = true,
   };
 }

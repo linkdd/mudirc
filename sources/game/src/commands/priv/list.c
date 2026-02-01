@@ -1,31 +1,26 @@
 #include <game/command.h>
 
 
-cmd_error priv_command_list(bot *self, str from, priv_command *cmd) {
+cmd_result priv_command_list(bot *self, str from, priv_command *cmd) {
   assert(self != NULL);
   assert(cmd  != NULL);
 
-  allocator a = std_allocator();
+  irc_msg resp     = {};
+  resp.has_prefix  = false;
+  resp.command     = str_literal("PRIVMSG");
+  resp.param_count = 1;
+  resp.params[0]   = from;
+  resp.trailing    = str_literal("Not yet implemented.");
 
-  irc_msg m_resp     = {};
-  m_resp.has_prefix  = false;
-  m_resp.command     = str_literal("PRIVMSG");
-  m_resp.param_count = 1;
-  m_resp.params[0]   = from;
-  m_resp.trailing    = str_literal("Not yet implemented.");
-
-  str s_resp = irc_msg_encode(&m_resp, a);
-  RESULT(UNIT, conn_error) res = conn_write(self->conn, s_resp);
-  str_free(a, &s_resp);
-
+  RESULT(UNIT, conn_error) res = irc_msg_send(&resp, self->conn, std_allocator());
   if (!res.is_ok) {
-    return (cmd_error){
+    return (cmd_result){
       .is_ok = false,
       .err   = strview_from_cstr(conn_strerror(res.err)),
     };
   }
 
-  return (cmd_error){
+  return (cmd_result){
     .is_ok = true,
   };
 }

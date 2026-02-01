@@ -24,17 +24,17 @@ struct game_command {
   str   params[game_command_max_params];
 };
 
-typedef RESULT(UNIT, str) cmd_error;
+typedef RESULT(UNIT, str) cmd_result;
 
 
 bool priv_command_parse(priv_command *self, str line);
 bool game_command_parse(game_command *self, str line);
 
 
-cmd_error priv_command_list(bot *self, str from, priv_command *cmd);
+cmd_result priv_command_list(bot *self, str from, priv_command *cmd);
 
-cmd_error game_command_query(bot *self, str channel, str from, game_command *cmd);
+cmd_result game_command_query(bot *self, str channel, str from, game_command *cmd);
 
 
-cmd_error priv_command_unknown(bot *self, str from);
-cmd_error game_command_unknown(bot *self, str channel, str from);
+cmd_result priv_command_unknown(bot *self, str from);
+cmd_result game_command_unknown(bot *self, str channel, str from);
