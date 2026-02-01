@@ -1,9 +1,0 @@
-project(cql C)
-
-file(GLOB_RECURSE CQL_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
-)
-
-add_executable(${PROJECT_NAME} ${CQL_SOURCES})
-
-set(CQL_BIN ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} CACHE INTERNAL "Path to cql binary")
