@@ -1,4 +1,74 @@
 #include <game/bot.h>
+#include <game/command.h>
+
+
+// MARK: - commands
+static const struct {
+  str         cmd;
+  cmd_error (*eval)(bot *self, str from, priv_command *cmd);
+} priv_cmd_hdlrs[] = {
+  { str_literal("list"), priv_command_list },
+};
+
+static const struct {
+  str         cmd;
+  cmd_error (*eval)(bot *self, str channel, str from, game_command *cmd);
+} game_cmd_hdlrs[] = {
+  { str_literal("query"), game_command_query },
+};
+
+static constexpr usize game_cmd_hdlr_count = sizeof(game_cmd_hdlrs) / sizeof(game_cmd_hdlrs[0]);
+static constexpr usize priv_cmd_hdlr_count = sizeof(priv_cmd_hdlrs) / sizeof(priv_cmd_hdlrs[0]);
+
+
+static RESULT(UNIT, str) bot__eval_priv_command(bot *self, str from, str message) {
+  assert(self != NULL);
+  assert(from.data    != NULL && from.length    > 0);
+  assert(message.data != NULL && message.length > 0);
+
+  priv_command cmd = {};
+  if (priv_command_parse(&cmd, message)) {
+    for (usize i = 0; i < priv_cmd_hdlr_count; ++i) {
+      typeof(priv_cmd_hdlrs[i]) h = priv_cmd_hdlrs[i];
+
+      if (str_equal(cmd.type, h.cmd)) {
+        return h.eval(self, from, &cmd);
+      }
+    }
+
+    return priv_command_unknown(self, from);
+  }
+
+  return (RESULT(UNIT, str)){
+    .is_ok = true,
+  };
+}
+
+
+static RESULT(UNIT, str) bot__eval_game_command(bot *self, str channel, str from, str message) {
+  assert(self != NULL);
+  assert(channel.data != NULL && channel.length > 0);
+  assert(from.data    != NULL && from.length    > 0);
+  assert(message.data != NULL && message.length > 0);
+
+  game_command cmd = {};
+  if (game_command_parse(&cmd, message)) {
+    for (usize i = 0; i < game_cmd_hdlr_count; ++i) {
+      typeof(game_cmd_hdlrs[i]) h = game_cmd_hdlrs[i];
+
+      if (str_equal(cmd.type, h.cmd)) {
+        return h.eval(self, channel, from, &cmd);
+      }
+    }
+
+    return game_command_unknown(self, channel, from);
+  }
+
+  return (RESULT(UNIT, str)){
+    .is_ok = true,
+  };
+}
+
 
 // MARK: - handlers
 static irc_error bot__ping(void *udata, irc_msg *msg) {
@@ -13,6 +83,30 @@ static irc_error bot__ping(void *udata, irc_msg *msg) {
       .is_ok = false,
       .err   = strview_from_cstr(conn_strerror(res.err)),
     };
+  }
+
+  return (irc_error){
+    .is_ok = true,
+  };
+}
+
+
+static irc_error bot__privmsg(void *udata, irc_msg *msg) {
+  assert(udata != NULL);
+  assert(msg   != NULL);
+
+  bot *self = (bot *)udata;
+
+  if (msg->has_prefix && msg->prefix.is_server == false) {
+    str from = msg->prefix.user.nick;
+    str to   = msg->params[0];
+
+    if (str_equal(to, self->nick)) {
+      bot__eval_priv_command(self, from, msg->trailing);
+    }
+    else {
+      bot__eval_game_command(self, to, from, msg->trailing);
+    }
   }
 
   return (irc_error){
@@ -123,7 +217,8 @@ irc_handler bot_handler(bot *self) {
   assert(self != NULL);
 
   return (irc_handler){
-    .ping = bot__ping,
+    .ping    = bot__ping,
+    .privmsg = bot__privmsg,
 
     .fallback = bot__fallback,
 
