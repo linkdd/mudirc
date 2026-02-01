@@ -14,7 +14,7 @@ cmd_result game_command_query(bot *self, str channel, str from, game_command *cm
   resp.params[0]   = channel;
   resp.trailing    = str_join(a, from, str_literal(": Not implemented yet."));
 
-  RESULT(UNIT, conn_error) res = irc_msg_send(&resp, self->conn, a);
+  auto res = irc_msg_send(&resp, self->conn, a);
   str_free(a, &resp.trailing);
 
   if (!res.is_ok) {

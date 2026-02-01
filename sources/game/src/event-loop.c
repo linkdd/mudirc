@@ -11,7 +11,7 @@ RESULT(UNIT, str) event_loop(bot *b) {
   irc_client_init(&c, b->conn, bot_handler(b));
 
   while (lc_running()) {
-    RESULT(bool, str) res = irc_client_consume(&c);
+    auto res = irc_client_consume(&c);
     if (!res.is_ok) {
       return (RESULT(UNIT, str)) ERR(res.err);
     }

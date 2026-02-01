@@ -13,7 +13,7 @@ cmd_result game_command_unknown(bot *self, str channel, str from) {
   m_resp.params[0]   = channel;
   m_resp.trailing    = str_join(a, from, str_literal(": Unknown command."));
 
-  RESULT(UNIT, conn_error) res = irc_msg_send(&m_resp, self->conn, a);
+  auto res = irc_msg_send(&m_resp, self->conn, a);
   str_free(a, &m_resp.trailing);
 
   if (!res.is_ok) {

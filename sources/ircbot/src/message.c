@@ -250,8 +250,8 @@ RESULT(UNIT, conn_error) irc_msg_send(irc_msg *self, conn_ref conn, allocator a)
   assert(self != NULL);
   assert(conn != NULL);
 
-  str encoded = irc_msg_encode(self, a);
-  RESULT(UNIT, conn_error) res = conn_write(conn, encoded);
-  str_free(a, &encoded);
+  str  enc = irc_msg_encode(self, a);
+  auto res = conn_write(conn, enc);
+  str_free(a, &enc);
   return res;
 }

@@ -21,8 +21,8 @@ void irc_client_init(irc_client *self, conn_ref conn, irc_handler handler) {
 RESULT(bool, str) irc_client_consume(irc_client *self) {
   assert(self != NULL);
 
-  str view = str_slice(self->buffer, self->buffer.length, self->buffer.capacity);
-  RESULT(UNIT, conn_error) c_res = conn_read(self->conn, &view);
+  str  view  = str_slice(self->buffer, self->buffer.length, self->buffer.capacity);
+  auto c_res = conn_read(self->conn, &view);
   if (!c_res.is_ok) {
     if (c_res.err != CONN_ERR_CLOSED) {
       return (RESULT(bool, str)) ERR(strview_from_cstr(conn_strerror(c_res.err)));
@@ -49,7 +49,7 @@ RESULT(bool, str) irc_client_consume(irc_client *self) {
     str     line = str_slice(self->buffer, 0, end_of_message);
     irc_msg msg  = {};
     if (irc_msg_decode(&msg, line)) {
-      RESULT(UNIT, str) res = irc_handler_call(self->handler, &msg);
+      auto res = irc_handler_call(self->handler, &msg);
       if (!res.is_ok) {
         return (RESULT(bool, str)) ERR(res.err);
       }

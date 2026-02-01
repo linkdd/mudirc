@@ -13,8 +13,7 @@ cmd_result priv_command_unknown(bot *self, str from) {
   resp.params[0]   = from;
   resp.trailing    = str_literal("Unknown command.");
 
-  RESULT(UNIT, conn_error) res = irc_msg_send(&resp, self->conn, a);
-
+  auto res = irc_msg_send(&resp, self->conn, a);
   if (!res.is_ok) {
     return (cmd_result){
       .is_ok = false,

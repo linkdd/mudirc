@@ -12,7 +12,7 @@ cmd_result priv_command_list(bot *self, str from, priv_command *cmd) {
   resp.params[0]   = from;
   resp.trailing    = str_literal("Not yet implemented.");
 
-  RESULT(UNIT, conn_error) res = irc_msg_send(&resp, self->conn, std_allocator());
+  auto res = irc_msg_send(&resp, self->conn, std_allocator());
   if (!res.is_ok) {
     return (cmd_result){
       .is_ok = false,

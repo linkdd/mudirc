@@ -14,14 +14,13 @@ static void on_shutdown_request(void *ctx) {
   allocator a                        = arena_allocator(&scratch);
   arena_init(&scratch, make_span(buf, irc_msg_buffer_size));
 
-  irc_msg m_quit     = {};
-  m_quit.has_prefix  = false;
-  m_quit.command     = str_literal("QUIT");
-  m_quit.param_count = 0;
-  m_quit.trailing    = str_literal("He's dead Jim.");
+  irc_msg quit     = {};
+  quit.has_prefix  = false;
+  quit.command     = str_literal("QUIT");
+  quit.param_count = 0;
+  quit.trailing    = str_literal("He's dead Jim.");
 
-  str s_quit = irc_msg_encode(&m_quit, a);
-  (void)conn_write(c, s_quit);
+  (void)irc_msg_send(&quit, c, a);
 
   conn_shutdown(c);
 }
@@ -44,7 +43,7 @@ int main(int argc, char *argv[static argc]) {
   netlib_init();
 
   fprintf(stderr, "INFO: Connecting to %s:%s...\n", server, port);
-  RESULT(conn, str) netlib_res = netlib_create_tcp_client(server, port);
+  auto netlib_res = netlib_create_tcp_client(server, port);
   if (!netlib_res.is_ok) {
     fprintf(
       stderr, "ERROR: Connection to %s:%s failed: %.*s\n",
@@ -59,7 +58,7 @@ int main(int argc, char *argv[static argc]) {
   lc_init(c, on_shutdown_request);
 
   bot b = {};
-  RESULT(UNIT, str) bot_res = bot_init(&b, dbpath, c, strview_from_cstr(nick));
+  auto bot_res = bot_init(&b, dbpath, c, strview_from_cstr(nick));
   if (!bot_res.is_ok) {
     fprintf(
       stderr, "ERROR: %.*s\n",
@@ -69,7 +68,7 @@ int main(int argc, char *argv[static argc]) {
     goto err2;
   }
 
-  RESULT(UNIT, str) loop_res = event_loop(&b);
+  auto loop_res = event_loop(&b);
   if (!loop_res.is_ok) {
     fprintf(
       stderr, "ERROR: %.*s\n",

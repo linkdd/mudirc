@@ -83,7 +83,7 @@ static irc_result bot__ping(void *udata, irc_msg *msg) {
     pong.params[i] = msg->params[i];
   }
 
-  RESULT(UNIT, conn_error) res = irc_msg_send(&pong, self->conn, std_allocator());
+  auto res = irc_msg_send(&pong, self->conn, std_allocator());
   if (!res.is_ok) {
     return (irc_result) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
@@ -141,7 +141,7 @@ RESULT(UNIT, str) bot__auth(bot *self) {
   m_nick.param_count = 1;
   m_nick.params[0]   = self->nick;
 
-  RESULT(UNIT, conn_error) res = irc_msg_send(&m_nick, self->conn, a);
+  auto res = irc_msg_send(&m_nick, self->conn, a);
   if (!res.is_ok) {
     return (RESULT(UNIT, str)) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
