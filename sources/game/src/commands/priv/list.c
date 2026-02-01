@@ -14,13 +14,8 @@ cmd_result priv_command_list(bot *self, str from, priv_command *cmd) {
 
   auto res = irc_msg_send(&resp, self->conn, std_allocator());
   if (!res.is_ok) {
-    return (cmd_result){
-      .is_ok = false,
-      .err   = strview_from_cstr(conn_strerror(res.err)),
-    };
+    return (cmd_result) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
 
-  return (cmd_result){
-    .is_ok = true,
-  };
+  return (cmd_result) OK({});
 }

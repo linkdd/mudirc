@@ -17,13 +17,8 @@ cmd_result game_command_unknown(bot *self, str channel, str from) {
   str_free(a, &m_resp.trailing);
 
   if (!res.is_ok) {
-    return (cmd_result){
-      .is_ok = false,
-      .err   = strview_from_cstr(conn_strerror(res.err)),
-    };
+    return (cmd_result) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
 
-  return (cmd_result){
-    .is_ok = true,
-  };
+  return (cmd_result) OK({});
 }

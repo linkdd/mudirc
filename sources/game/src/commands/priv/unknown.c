@@ -15,13 +15,8 @@ cmd_result priv_command_unknown(bot *self, str from) {
 
   auto res = irc_msg_send(&resp, self->conn, a);
   if (!res.is_ok) {
-    return (cmd_result){
-      .is_ok = false,
-      .err   = strview_from_cstr(conn_strerror(res.err)),
-    };
+    return (cmd_result) ERR(strview_from_cstr(conn_strerror(res.err)));
   }
 
-  return (cmd_result){
-    .is_ok = true,
-  };
+  return (cmd_result) OK({});
 }

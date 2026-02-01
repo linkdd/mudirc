@@ -38,7 +38,5 @@ irc_result irc_handler_call(irc_handler self, irc_msg *msg) {
     return self.fallback(self.udata, msg);
   }
 
-  return (irc_result){
-    .is_ok = true,
-  };
+  return (irc_result) OK({});
 }
