@@ -3,19 +3,19 @@
 #include <preludec/net/conn.h>
 #include <ircbot/handler.h>
 
-#include <sqlite3.h>
+#include <game/db.h>
 
 
 typedef struct bot bot;
 struct bot {
-  sqlite3  *db;
+  database *db;
   conn_ref  conn;
 
   str nick;
 };
 
 
-RESULT(UNIT, str) bot_init  (bot *self, const char *dbpath, conn_ref c, str nick);
+RESULT(UNIT, str) bot_init  (bot *self, database *db, conn_ref c, str nick);
 void              bot_deinit(bot *self);
 
 

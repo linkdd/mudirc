@@ -165,18 +165,13 @@ RESULT(UNIT, str) bot__auth(bot *self) {
 
 
 // MARK: - api
-RESULT(UNIT, str) bot_init(bot *self, const char *dbpath, conn_ref c, str nick) {
-  assert(self   != NULL);
-  assert(dbpath != NULL);
-  assert(c      != NULL);
+RESULT(UNIT, str) bot_init(bot *self, database *db, conn_ref c, str nick) {
+  assert(self != NULL);
+  assert(db    != NULL);
+  assert(c    != NULL);
   assert(nick.data != NULL && nick.length > 0);
 
-  int res = sqlite3_open(dbpath, &self->db);
-  assert_release(self->db != NULL);
-  if (res != SQLITE_OK) {
-    return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errmsg(self->db)));
-  }
-
+  self->db   = db;
   self->conn = c;
   self->nick = nick;
 
@@ -186,10 +181,6 @@ RESULT(UNIT, str) bot_init(bot *self, const char *dbpath, conn_ref c, str nick) 
 
 void bot_deinit(bot *self) {
   assert(self != NULL);
-
-  if (self->db != NULL) {
-    sqlite3_close(self->db);
-  }
 
   memset(self, 0, sizeof(bot));
 }

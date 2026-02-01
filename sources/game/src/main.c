@@ -29,6 +29,8 @@ static void on_shutdown_request(void *ctx) {
 int main(int argc, char *argv[static argc]) {
   int exit_status = EXIT_SUCCESS;
 
+  netlib_init();
+
   if (argc < 5) {
     fprintf(stderr, "Usage: %s <db path> <server> <port> <nick>\n", argv[0]);
     exit_status = EXIT_FAILURE;
@@ -40,7 +42,18 @@ int main(int argc, char *argv[static argc]) {
   const char *port   = argv[3];
   const char *nick   = argv[4];
 
-  netlib_init();
+  fprintf(stderr, "INFO: Opening database at %s...\n", dbpath);
+  database db = {};
+  auto db_res = database_init(&db, dbpath);
+  if (!db_res.is_ok) {
+    fprintf(
+      stderr, "ERROR: Failed to open database at %s: %.*s\n",
+      dbpath,
+      (int)db_res.err.length, db_res.err.data
+    );
+    exit_status = EXIT_FAILURE;
+    goto err1;
+  }
 
   fprintf(stderr, "INFO: Connecting to %s:%s...\n", server, port);
   auto netlib_res = netlib_create_tcp_client(server, port);
@@ -51,21 +64,21 @@ int main(int argc, char *argv[static argc]) {
       (int)netlib_res.err.length, netlib_res.err.data
     );
     exit_status = EXIT_FAILURE;
-    goto err1;
+    goto err2;
   }
 
   conn_ref c = &netlib_res.ok;
   lc_init(c, on_shutdown_request);
 
   bot b = {};
-  auto bot_res = bot_init(&b, dbpath, c, strview_from_cstr(nick));
+  auto bot_res = bot_init(&b, &db, c, strview_from_cstr(nick));
   if (!bot_res.is_ok) {
     fprintf(
       stderr, "ERROR: %.*s\n",
       (int)bot_res.err.length, bot_res.err.data
     );
     exit_status = EXIT_FAILURE;
-    goto err2;
+    goto err3;
   }
 
   auto loop_res = event_loop(&b);
@@ -75,20 +88,22 @@ int main(int argc, char *argv[static argc]) {
       (int)loop_res.err.length, loop_res.err.data
     );
     exit_status = EXIT_FAILURE;
-    goto err3;
+    goto err4;
   }
 
   fprintf(stderr, "INFO: Shutting down\n");
 
-err3:
+err4:
   bot_deinit(&b);
 
-err2:
+err3:
   conn_deinit(c);
 
+err2:
 err1:
-  netlib_deinit();
+  database_deinit(&db);
 
 err0:
+  netlib_deinit();
   return exit_status;
 }
