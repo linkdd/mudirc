@@ -29,7 +29,7 @@ static RESULT(UNIT, str) bot__eval_priv_command(bot *self, str from, str message
   priv_command cmd = {};
   if (priv_command_parse(&cmd, message)) {
     for (usize i = 0; i < priv_cmd_hdlr_count; ++i) {
-      typeof(priv_cmd_hdlrs[i]) h = priv_cmd_hdlrs[i];
+      auto h = priv_cmd_hdlrs[i];
 
       if (str_equal(cmd.type, h.cmd)) {
         return h.eval(self, from, &cmd);
@@ -52,7 +52,7 @@ static RESULT(UNIT, str) bot__eval_game_command(bot *self, str channel, str from
   game_command cmd = {};
   if (game_command_parse(&cmd, message)) {
     for (usize i = 0; i < game_cmd_hdlr_count; ++i) {
-      typeof(game_cmd_hdlrs[i]) h = game_cmd_hdlrs[i];
+      auto h = game_cmd_hdlrs[i];
 
       if (str_equal(cmd.type, h.cmd)) {
         return h.eval(self, channel, from, &cmd);

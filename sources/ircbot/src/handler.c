@@ -23,7 +23,7 @@ irc_result irc_handler_call(irc_handler self, irc_msg *msg) {
   const usize handler_count = sizeof(handlers) / sizeof(handlers[0]);
 
   for (usize i = 0; i < handler_count; ++i) {
-    typeof(handlers[i]) h = handlers[i];
+    auto h = handlers[i];
 
     if (str_equal(msg->command, h.cmd)) {
       if (h.handler != NULL) {
