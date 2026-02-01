@@ -11,5 +11,5 @@ add_subdirectory(tools/cql)
 
 add_subdirectory(sources/preludec)
 add_subdirectory(sources/ircbot)
-add_subdirectory(sources/sqlite3)
+add_subdirectory(sources/database)
 add_subdirectory(sources/game)

@@ -23,13 +23,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
   $<TARGET_PROPERTY:preludec,INTERFACE_INCLUDE_DIRECTORIES>
   $<TARGET_PROPERTY:ircbot,INTERFACE_INCLUDE_DIRECTORIES>
-  $<TARGET_PROPERTY:sqlite3,INTERFACE_INCLUDE_DIRECTORIES>
+  $<TARGET_PROPERTY:database,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   preludec
   ircbot
-  sqlite3
+  database
 )
 
 install(
