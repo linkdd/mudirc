@@ -58,17 +58,18 @@ static str parse_prefix(irc_msg *self, str line) {
     self->prefix.is_server    = true;
     self->prefix.server.ident = prefix;
 
-    for (i = 0; i < prefix.length; i++) {
-      if (prefix.data[i] == '!') {
+    for (usize j = 0; j < prefix.length; ++j) {
+      if (prefix.data[j] == '!') {
         self->prefix.is_server = false;
-        self->prefix.user.nick = str_slice(prefix, 0, i);
+        self->prefix.user.nick = str_slice(prefix, 0, j);
 
-        usize j = i + 1;
-        while (j < prefix.length && prefix.data[j] != '@') {
-          j++;
+        usize k = j + 1;
+        while (k < prefix.length && prefix.data[k] != '@') {
+          k++;
         }
-        self->prefix.user.ident = str_slice(prefix, i + 1, j);
-        self->prefix.user.host  = str_slice(prefix, j + 1, prefix.length);
+        self->prefix.user.ident = str_slice(prefix, j + 1, k);
+        self->prefix.user.host  = str_slice(prefix, k + 1, prefix.length);
+
         break;
       }
     }
