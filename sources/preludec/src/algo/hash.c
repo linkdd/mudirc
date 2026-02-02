@@ -9,7 +9,7 @@ u64 fnv1a(const_span buf) {
 
   u64 hash = FNV_OFFSET_BASIS;
 
-  for (usize i = 0; i < buf.size; i++) {
+  for (usize i = 0; i < buf.size; ++i) {
     hash ^= ((const u8*)buf.data)[i];
     hash *= FNV_PRIME;
   }

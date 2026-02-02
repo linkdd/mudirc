@@ -16,6 +16,8 @@
 
 #include <string.h>
 
+#include <errno.h>
+
 
 // MARK: - typedefs
 typedef uint8_t   u8;

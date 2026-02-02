@@ -1,7 +1,5 @@
 #include <preludec/net/lib.h>
 
-#include <errno.h>
-
 
 void netlib_init(void) {
 #ifdef _WIN32

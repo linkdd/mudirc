@@ -110,7 +110,7 @@ str str_slice(str s, usize start, usize end) {
   return (str){
     .data     = s.data + start,
     .length   = end - start,
-    .capacity = s.capacity - start,
+    .capacity = end - start,
     .owned    = false,
   };
 }
