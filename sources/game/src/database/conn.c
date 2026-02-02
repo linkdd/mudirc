@@ -1,4 +1,5 @@
 #include <game/database/conn.h>
+#include <generated/sql.h>
 
 
 RESULT(UNIT, str) dbconn_init(dbconn *self, const char *path) {
@@ -29,7 +30,7 @@ RESULT(UNIT, str) dbconn_init(dbconn *self, const char *path) {
     return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errmsg(self->handle)));
   }
 
-  return (RESULT(UNIT, str)) OK({});
+  return sql__schema_migration(self->handle, SQL_NOITER);
 }
 
 
