@@ -40,7 +40,7 @@ RESULT(UNIT, conn_error) conn_write(conn *self, str payload) {
 
 RESULT(UNIT, conn_error) conn_read(conn *self, str *buffer) {
   assert(self != NULL);
-  assert(buffer->data != NULL && buffer->capacity > 0);
+  assert(buffer != NULL && buffer->data != NULL && buffer->capacity > 0);
 
   isize n = recv(self->sock, buffer->data, buffer->capacity, 0);
   if (n < 0) {
