@@ -7,7 +7,7 @@ static inline void stream_write_str(stream *io, str s) {
   assert(io != NULL);
 
   iostatus status = {};
-  stream_write(io, str_as_const_span(s), &status);
+  stream_write(io, make_const_span(s.data, s.length * sizeof(char)), &status);
   assert_release(status != IO_STATUS_ERROR);
 }
 
@@ -33,7 +33,9 @@ void write_header_prelude(stream *io) {
     "  void (*next)(void *udata, sqlite3_stmt *stmt);\n\n"
 
     "  void *udata;\n"
-    "};\n\n\n"
+    "};\n\n"
+
+    "#define SQL_NOITER  ((sql_iterator){ .next = NULL, .udata = NULL })\n\n\n"
   ));
 }
 
