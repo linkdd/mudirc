@@ -157,11 +157,14 @@ void write_implementation(stream *io, str proc_name, VEC(sql_param) params, cons
 
     "  str next = query;\n\n"
 
+    "  assert_release(SQLITE_OK == sqlite3_exec(db, \"BEGIN;\", NULL, NULL, NULL));\n\n"
+
     "  while(true) {\n"
     "    const char   *tail = NULL;\n"
     "    sqlite3_stmt *stmt = NULL;\n"
     "    int           res  = sqlite3_prepare(db, next.data, (int)next.length, &stmt, &tail);\n"
     "    if (res != SQLITE_OK) {\n"
+    "      assert_release(SQLITE_OK == sqlite3_exec(db, \"ROLLBACK;\", NULL, NULL, NULL));\n"
     "      return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errstr(res)));\n"
     "    }\n\n"
 
@@ -205,6 +208,7 @@ void write_implementation(stream *io, str proc_name, VEC(sql_param) params, cons
         ");\n"
         "      if (res != SQLITE_OK) {\n"
         "        assert_release(SQLITE_OK == sqlite3_finalize(stmt));\n"
+        "        assert_release(SQLITE_OK == sqlite3_exec(db, \"ROLLBACK;\", NULL, NULL, NULL));\n"
         "        return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errstr(res)));\n"
         "      }\n"
         "    }\n\n"
@@ -223,6 +227,7 @@ void write_implementation(stream *io, str proc_name, VEC(sql_param) params, cons
     "      }\n"
     "      else {\n"
     "        assert_release(SQLITE_OK == sqlite3_finalize(stmt));\n"
+    "        assert_release(SQLITE_OK == sqlite3_exec(db, \"ROLLBACK;\", NULL, NULL, NULL));\n"
     "        return (RESULT(UNIT, str)) ERR(strview_from_cstr(sqlite3_errstr(res)));\n"
     "      }\n"
     "    }\n\n"
@@ -235,6 +240,8 @@ void write_implementation(stream *io, str proc_name, VEC(sql_param) params, cons
     "      query.length\n"
     "    );\n"
     "  }\n\n"
+
+    "  assert_release(SQLITE_OK == sqlite3_exec(db, \"COMMIT;\", NULL, NULL, NULL));\n\n"
 
     "  return (RESULT(UNIT, str)) OK({});\n"
     "}\n\n"
